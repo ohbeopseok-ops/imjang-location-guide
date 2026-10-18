@@ -81,6 +81,50 @@ get_map_embed_url(center, markers, radius_m=1000, title='[단지명] 입지분�
 - 결과의 expires_at(약 7일)을 기록하고 보고서에 '○○까지 유효, 만료 시 재발급 필요'를 명시한다.
 - 여러 단지 비교 시에는 단지마다 지도 하나씩 만든다.
 
+### 5-1. 지도 저장 (링크가 만료돼도 남게)
+지도 링크는 약 7일 뒤 만료되고 서버 쪽 저장이라 사용자가 직접 보관할 수 없다. 그래서 보고서에 지도 데이터를 같이 담는다.
+- get_map_embed_url에 넣은 center, radius_m, title, markers(name·lat·lng·color)와 expires_at, 지도 URL을 JSON 한 덩어리로 보고서에 내장한다.
+- 아래 블록을 보고서 '입지분석 지도' 섹션의 iframe 바로 뒤에 그대로 넣는다. `__MAP_JSON__`만 위 JSON으로 바꾼다(문자열의 `</`는 `<\/`로 이스케이프). iframe에는 id="map-frame"을 단다.
+- 이 블록이 하는 일: 만료와 무관한 약식 지도(SVG, 번호 마커+목록), 마커 데이터 .json 저장 버튼, 재발급 요청문 복사 버튼, 만료일이 지나면 iframe을 숨기고 안내를 띄운다.
+- 약식 지도는 직선 위치 관계만 보여 주므로 실제 길과 다르다는 문구를 지운다. 외부 라이브러리는 쓰지 않는다.
+- 재발급 요청을 받으면 사용자가 붙여 준 JSON의 center, radius_m, markers, title을 그대로 get_map_embed_url에 넣어 새 링크를 만들고, 새 만료일을 알린다.
+- 사용자가 지도 이미지를 달라고 하면, 연결된 서버에 정적 지도 도구(예: get_static_map)가 있을 때만 쓴다. 없으면 약식 지도 SVG를 쓰라고 안내한다.
+
+```html
+<section id="map-save">
+<h3>지도 저장 (링크가 만료돼도 남습니다)</h3>
+<p id="map-expired" class="note" hidden>지도 링크가 만료됐습니다. 아래 약식 지도를 쓰거나, 재발급 요청문을 복사해 다시 만들어 달라고 하세요.</p>
+<svg id="map-svg" viewBox="0 0 640 640" role="img" aria-label="약식 입지 지도" style="width:100%;max-width:640px;height:auto;border:1px solid #E3E3E3;border-radius:10px;background:#fff"></svg>
+<ol id="map-legend"></ol>
+<p class="screen-only"><button type="button" id="btn-json" style="min-height:44px;padding:0 14px;margin-right:8px">마커 데이터 저장(.json)</button><button type="button" id="btn-copy" style="min-height:44px;padding:0 14px">지도 재발급 요청문 복사</button> <span id="map-msg" role="status"></span></p>
+<small>약식 지도는 직선 위치 관계만 보여 주며 실제 길과 다릅니다. 번호는 위 목록과 같습니다.</small>
+<script type="application/json" id="map-data">__MAP_JSON__</script>
+<script>
+(function(){
+var D=JSON.parse(document.getElementById('map-data').textContent);
+var C={Red:'#e03131',Blue:'#1c7ed6',Green:'#2f9e44',Purple:'#7048e8',Orange:'#f76707',Yellow:'#fcc419',Gray:'#868e96'};
+var kx=111320*Math.cos(D.center.lat*Math.PI/180),ky=110540;
+function xy(m){return [(m.lng-D.center.lng)*kx,(D.center.lat-m.lat)*ky];}
+var far=D.radius_m*1.1;
+D.markers.forEach(function(m){var p=xy(m);far=Math.max(far,Math.hypot(p[0],p[1])*1.08);});
+var s=290/far,NS='http://www.w3.org/2000/svg',svg=document.getElementById('map-svg'),lg=document.getElementById('map-legend');
+function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+svg.appendChild(el('circle',{cx:320,cy:320,r:D.radius_m*s,fill:'none',stroke:'#2D7D6F','stroke-dasharray':'6 6'}));
+var t=el('text',{x:320,y:320-D.radius_m*s-6,'text-anchor':'middle','font-size':14,fill:'#595959'});t.textContent='반경 '+D.radius_m+'m';svg.appendChild(t);
+D.markers.forEach(function(m,i){var p=xy(m),x=320+p[0]*s,y=320+p[1]*s;
+ svg.appendChild(el('circle',{cx:x,cy:y,r:11,fill:C[m.color]||m.color||'#868e96',stroke:'#fff','stroke-width':2}));
+ var n=el('text',{x:x,y:y+5,'text-anchor':'middle','font-size':13,'font-weight':700,fill:(m.color==='Yellow'?'#1F1F1F':'#fff')});n.textContent=i+1;svg.appendChild(n);
+ var li=document.createElement('li');li.textContent=m.name;lg.appendChild(li);});
+if(D.expires_at&&Date.now()>Date.parse(D.expires_at)){document.getElementById('map-expired').hidden=false;var f=document.getElementById('map-frame');if(f)f.hidden=true;}
+var msg=document.getElementById('map-msg');
+document.getElementById('btn-json').onclick=function(){var b=new Blob([JSON.stringify(D,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=D.title+'.json';a.click();};
+document.getElementById('btn-copy').onclick=function(){var txt='아래 데이터로 입지톡 지도를 다시 만들어줘. center, radius_m, markers를 그대로 쓰고 title도 같게 해줘.\n'+JSON.stringify(D);
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){msg.textContent='복사됨';},function(){msg.textContent='복사 실패. JSON 저장 버튼을 쓰세요';});}else{msg.textContent='복사 실패. JSON 저장 버튼을 쓰세요';}};
+})();
+</script>
+</section>
+```
+
 ## 6. 채팅 요약 (HTML보다 먼저)
 1. 단지 한 줄 소개와 가정(프로필) 한 줄.
 2. 표: 구분 | 내용 | 직선거리 | 도보 추정 (지하철·마트·시장·공원·초등학교·주변 단지).
@@ -106,7 +150,7 @@ get_map_embed_url(center, markers, radius_m=1000, title='[단지명] 입지분�
 5. 교육: 초등학교 3곳과 '초품아 여부'. 단지 부지 내 학교가 아니면 '초품아 아님'으로 정직하게 쓴다. 학교 수준·학업 평가는 다루지 않는다(데이터 없음). 배정은 교육청 학구도 확인을 안내한다.
 6. 주변 단지: 거리·특징 (세대수 등은 조회한 경우만).
 7. 호재: 연도 | 제목 | 설명 | 신뢰도 등급(🟢🟡⚠️) | 출처.
-8. 입지분석 지도: iframe(높이 520px) + 마커 색 범례 + 만료일 주석.
+8. 입지분석 지도: iframe(높이 520px, id="map-frame") + 마커 색 범례 + 만료일 주석 + 5-1의 지도 저장 블록.
 9. 임장 체크리스트 (아래).
 10. 한계와 확인처 / 푸터.
 
@@ -143,6 +187,7 @@ get_map_embed_url(center, markers, radius_m=1000, title='[단지명] 입지분�
 - [ ] 초품아 여부를 정직하게 썼는가
 - [ ] 호재마다 신뢰도 등급과 출처가 있는가
 - [ ] 지도 iframe URL과 만료일이 맞는가
+- [ ] 지도 저장 블록의 JSON 마커가 get_map_embed_url에 보낸 값과 같은가
 - [ ] 체크리스트가 단지 특성(주의점)을 반영했는가
 - [ ] 요약 텍스트가 HTML보다 먼저 나갔는가
 
