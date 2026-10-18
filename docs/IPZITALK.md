@@ -97,11 +97,13 @@ ipzitalk 플러그인에는 자체 스킬이 함께 설치될 수 있고, 입지
 | `get_region_code` | 주소를 법정동·시군구·청약홈 지역코드로 변환 | 청약 공고 검색용. 이 스킬의 기본 흐름에서는 쓰지 않음 |
 | `search_presale_notices_by_filter` | 청약홈 분양 공고 조회 | 이 스킬의 기본 흐름에서는 쓰지 않음 |
 
-### 도구 이름 변경 이력
+### 서버별 도구 이름 차이
 
-옛 `get_complex_info`는 현재 서버에서 아래 둘로 나뉘었고, `SKILL.md`는 2026-10-18 기준 현재 이름으로 갱신됐습니다. 이전 버전 스킬을 쓰고 있다면 최신으로 교체하세요.
+ipzitalk 공식 저장소는 Remote 도구를 11종(`get_complex_info`, `enrich_complex_info`, `get_complex_trades`, `get_static_map`, `search_announcement_info` 등)으로 안내하는 반면, 2026-10-18에 연결해 확인한 서버는 10종(`get_complex_info_by_query`, `get_complex_info_batch`, `find_complexes_near_point`, `search_presale_notices_by_filter` 등)이었습니다. 연결 방식과 시점에 따라 이름이 다를 수 있어서, `SKILL.md`는 단지 정보 도구를 `get_complex_info_batch` 우선, 없으면 `get_complex_info` 순으로 쓰도록 되어 있습니다.
 
-| 옛 표기 | 현재 도구 |
+아래는 이름이 갈라진 대응입니다.
+
+| 공식 저장소 표기 | 확인한 서버의 도구 |
 |---|---|
 | `get_complex_info(complex_query)` | `get_complex_info_by_query(complex_query)` |
 | `get_complex_info(complex_query, detail=true)` | `get_complex_info_batch(items=[{complex_query}], detail=true)` |
@@ -113,7 +115,7 @@ ipzitalk 플러그인에는 자체 스킬이 함께 설치될 수 있고, 입지
 - **'대형마트' 카테고리에 슈퍼마켓이 잡힐 수 있습니다.** 이 스킬은 실제 업종대로 표기합니다.
 - **지도 링크는 약 7일 뒤 만료됩니다.** 응답의 `expires_at`으로 확인하며, 만료되면 다시 만들어야 합니다.
 - **지도에 보낸 마커·좌표는 ipzitalk 서버에 저장되고, 링크를 아는 사람은 열어 볼 수 있습니다.** 자택 같은 민감한 위치는 넣지 마세요.
-- **베타라서 도구 이름과 파라미터가 바뀔 수 있습니다.** 실제로 `get_complex_info`가 위 두 도구로 나뉜 것이 확인됐습니다. 이상하면 연결된 서버의 도구 목록을 먼저 보세요.
+- **베타라서 도구 이름과 파라미터가 바뀔 수 있습니다.** 실제로 `get_complex_info`가 확인한 서버에서는 위 두 도구로 나뉘어 있었습니다. 이상하면 연결된 서버의 도구 목록을 먼저 보세요.
 - **직선거리 기반입니다.** 길찾기 기능이 없어서 도보 시간은 추정치입니다.
 
 ## 5. 카카오 공식 MCP와의 차이

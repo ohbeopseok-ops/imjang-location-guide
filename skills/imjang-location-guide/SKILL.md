@@ -41,7 +41,7 @@ description: "임장 준비자(첫집·실거주·투자)를 위해 단지·주�
 웹서치·추정값으로 입지 요소를 대체하지 않는다. 반경은 1000m, 요소별 상위 3개까지.
 
 ### 3-1. 위치 확정
-1. get_complex_info_batch(items=[{complex_query: 단지명}], detail=true): 준공연도, 세대수, 동수, 시공사, 난방, 학교 안내, 지하철 도보 안내. 학교·지하철 안내는 상세(detail) 조회에만 들어 있다. 기본정보만 필요하면 get_complex_info_by_query(complex_query=단지명)를 쓴다.
+1. 단지 정보(준공연도, 세대수, 동수, 시공사, 난방, 학교 안내, 지하철 도보 안내): 연결된 ipzitalk 서버의 도구 목록에서 get_complex_info_batch(items=[{complex_query: 단지명}], detail=true)를 먼저 찾는다. 없으면 get_complex_info(complex_query=단지명, detail=true)를 쓴다. 기본정보만 필요하면 get_complex_info_by_query(complex_query=단지명)도 된다. 서버마다 도구 이름이 다르므로(베타) 스키마를 확인한 뒤 호출한다. 학교·지하철 안내는 상세(detail) 조회에만 들어 있다.
 2. get_address(query=단지명 또는 주소): 위경도. 카테고리가 '부동산 > 주거시설 > 아파트'이고 주소가 일치하는 항목을 center로 쓴다. 상가·어린이집·정문 등은 center로 쓰지 않는다.
 3. 단지가 하나로 특정되면 묻지 말고 진행한다. 후보가 여럿이면 AskUserQuestion으로 고르게 한다.
 
