@@ -83,11 +83,11 @@ ipzitalk 플러그인에는 자체 스킬이 함께 설치될 수 있고, 입지
 | `get_region_code` | 주소를 법정동·시군구·청약홈 지역코드로 변환 | 청약 공고 검색용. 이 스킬의 기본 흐름에서는 쓰지 않음 |
 | `search_presale_notices_by_filter` | 청약홈 분양 공고 조회 | 이 스킬의 기본 흐름에서는 쓰지 않음 |
 
-### 스킬 본문의 옛 도구 이름
+### 도구 이름 변경 이력
 
-스킬 본문(`SKILL.md`)에는 `get_complex_info(complex_query, detail=true)`라는 이름이 남아 있습니다. 현재 서버에는 이 이름이 없고 다음 둘로 나뉘어 있습니다. Claude가 도구 목록을 보고 맞는 쪽을 고르면 되지만, 직접 설정한다면 아래 대응을 따르세요.
+옛 `get_complex_info`는 현재 서버에서 아래 둘로 나뉘었고, `SKILL.md`는 2026-10-18 기준 현재 이름으로 갱신됐습니다. 이전 버전 스킬을 쓰고 있다면 최신으로 교체하세요.
 
-| 스킬 본문 표기 | 현재 도구 |
+| 옛 표기 | 현재 도구 |
 |---|---|
 | `get_complex_info(complex_query)` | `get_complex_info_by_query(complex_query)` |
 | `get_complex_info(complex_query, detail=true)` | `get_complex_info_batch(items=[{complex_query}], detail=true)` |

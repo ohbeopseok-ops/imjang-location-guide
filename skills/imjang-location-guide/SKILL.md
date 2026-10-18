@@ -41,13 +41,13 @@ description: "임장 준비자(첫집·실거주·투자)를 위해 단지·주�
 웹서치·추정값으로 입지 요소를 대체하지 않는다. 반경은 1000m, 요소별 상위 3개까지.
 
 ### 3-1. 위치 확정
-1. get_complex_info(complex_query=단지명, detail=true): 준공연도, 세대수, 동수, 시공사, 난방, 학교 안내, 지하철 도보 안내.
+1. get_complex_info_batch(items=[{complex_query: 단지명}], detail=true): 준공연도, 세대수, 동수, 시공사, 난방, 학교 안내, 지하철 도보 안내. 학교·지하철 안내는 상세(detail) 조회에만 들어 있다. 기본정보만 필요하면 get_complex_info_by_query(complex_query=단지명)를 쓴다.
 2. get_address(query=단지명 또는 주소): 위경도. 카테고리가 '부동산 > 주거시설 > 아파트'이고 주소가 일치하는 항목을 center로 쓴다. 상가·어린이집·정문 등은 center로 쓰지 않는다.
 3. 단지가 하나로 특정되면 묻지 말고 진행한다. 후보가 여럿이면 AskUserQuestion으로 고르게 한다.
 
 ### 3-2. 주변 요소
 - search_by_nearby_category(categories=['subway','mart_large','school_elementary'], center_lat, center_lng, radius_m=1000)
-- 공원·시장·병원·약국·편의점·주변 단지는 search_by_nearby_keyword(query=..., limit=5~10, deduplicate_by='name')를 쓴다. 주변 단지는 preset='apartment'.
+- 공원·시장·병원·약국·편의점·주변 단지는 search_by_nearby_keyword(query=..., radius_m=1000, deduplicate_by='name')를 쓴다. 주변 단지는 preset='apartment'. 호출당 결과는 최대 50개로 고정되므로, 거리순 상위 중 업종이 맞는 것만 채택한다.
 - 키워드 검색은 노이즈가 많다. 결과의 kakao_category_name으로 해당 업종만 채택한다. 예: 공원 검색에 전기차 충전소·주차장이 섞이면 제외, 시장 검색에 음식점·빵집이 섞이면 제외(상호에 '시장'이 들어간 가게는 시장이 아님).
 - 대형마트 카테고리에 슈퍼마켓이 잡히면 '슈퍼마켓'으로 정직하게 표기한다. 대형마트가 없으면 '1km 내 확인되지 않음'으로 쓴다.
 - 병원·약국·편의점은 결과를 보고 판단하되 업종이 확실한 것만 채택한다.
@@ -56,10 +56,11 @@ description: "임장 준비자(첫집·실거주·투자)를 위해 단지·주�
 반경 1km 안에 지하철역이 없으면 query='지하철역', radius_m=2000으로 다시 조회한다. 반경 밖 최근접역은 '반경 1km 밖 — 참고용'으로 분리 표기하고, 핵심 지표에는 '1km 내 0'으로 쓴다.
 
 ### 3-4. 보조 도구 (필요할 때만)
-동네만 주어졌을 때의 후보 찾기 find_complexes_near_point, 여러 단지 정보 get_complex_info_batch, 지역코드 get_region_code, 주변 분양 공고 search_presale_notices_by_filter가 있다. 이 도구들은 ToolSearch로 스키마를 먼저 불러온 뒤 도구 설명대로 쓴다. 파라미터를 추측해서 호출하지 않는다.
+동네만 주어졌을 때의 후보 찾기 find_complexes_near_point, 지역코드 get_region_code, 주변 분양 공고 search_presale_notices_by_filter가 있다. 이 도구들은 ToolSearch로 스키마를 먼저 불러온 뒤 도구 설명대로 쓴다. 파라미터를 추측해서 호출하지 않는다.
 
 ### 3-5. 도구 오류 처리
 'No approval received' 등으로 거절되면 같은 호출을 다시 시도한다. 끝내 안 되면 그 항목을 '조회 실패'로 명시하고 나머지로 진행한다. 값을 지어내지 않는다.
+도구 이름이 없다는 오류가 나면(ipzitalk은 베타라 이름이 바뀔 수 있다) 연결된 서버의 도구 목록에서 같은 기능의 도구를 찾아 쓴다. 이때도 파라미터를 추측하지 않고 스키마를 확인한다.
 
 ### 3-6. 시간 추정 규칙
 - 도보: 직선거리 ÷ 75m(분속), 반올림. 1km를 넘으면 '도보 15분+'로 쓴다.
