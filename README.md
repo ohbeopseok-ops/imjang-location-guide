@@ -22,9 +22,33 @@
 
 | 항목 | 필수 여부 | 비고 |
 |---|---|---|
-| ipzitalk(입지톡) MCP 연결 | 필수 | 주소·시설·지도 데이터 출처. 연결 권한은 각자 확인 |
+| ipzitalk(입지톡) MCP 연결 | 필수 | 주소·시설·단지·지도 데이터 출처. 아래 설명 참고 |
 | 웹 검색 | 필수 | 호재 조사에만 사용 |
 | 코드 실행·파일 생성 | 권장 | HTML 보고서 파일 생성용 |
+
+### ipzitalk MCP란
+
+카카오가 만든 MCP가 아니라 **시너지랩스(Synergy Labs)가 운영하는 서드파티 베타 서비스**입니다. 카카오 로컬, K-apt, 청약홈, 네이버 지오코딩·지도 데이터를 묶어 도구 10개로 제공합니다. 이 스킬은 입지 요소를 이 서버의 결과로만 채웁니다.
+
+연결은 두 가지 중 하나를 고르세요. 동시에 켜지 마세요.
+
+| 방식 | 필요한 것 | 비고 |
+|---|---|---|
+| Remote (호스티드) | 카카오 계정 로그인 | 가장 간단. 안내 페이지 기준 무료 플랜 하루 500회 |
+| OSS 로컬 | Node.js 18+, API 키 4개 (카카오 REST, 네이버 지도 ID·Secret, data.go.kr) | 직접 운영. 키 발급처 정책을 따름 |
+
+Claude Code에서는 아래 순서로 설치하고, 이어서 나오는 `setup`에서 모드를 고릅니다.
+
+```
+/plugin marketplace add chatdaeri/ipzitalk
+/plugin install ipzitalk@ipzitalk
+/reload-plugins
+/ipzitalk:setup
+```
+
+Claude 앱에서는 커스텀 커넥터를 추가합니다. 이름은 `ipzitalk`, URL은 `https://ipzi-talk.synergylabs.kr/mcp`이고 로그인 방식으로 인증합니다.
+
+서비스는 베타라 요금·한도·도구 이름이 바뀔 수 있습니다. 데이터 출처, 도구별 한도, 알려진 제약은 [ipzitalk 가이드](docs/IPZITALK.md)에 정리했고, 최신 내용은 [ipzitalk 안내 페이지](https://ipzi-talk.synergylabs.kr)와 [GitHub](https://github.com/chatdaeri/ipzitalk)를 확인하세요.
 
 ## 설치
 
