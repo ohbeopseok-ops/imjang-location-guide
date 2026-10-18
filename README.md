@@ -48,6 +48,8 @@ Claude Code에서는 아래 순서로 설치하고, 이어서 나오는 `setup`�
 
 Claude 앱에서는 커스텀 커넥터를 추가합니다. 이름은 `ipzitalk`, URL은 `https://ipzi-talk.synergylabs.kr/mcp`이고 로그인 방식으로 인증합니다.
 
+**이용약관:** ipzitalk은 [서비스 이용약관](https://ipji-talk.com/legal/terms)을 따릅니다. 서비스로 얻은 정보의 영리 이용은 사전 서면 동의가 필요하다고 정해져 있으니(제15조 3항), 보고서를 판매·광고 콘텐츠로 쓰려면 서비스 쪽에 먼저 확인하세요. 이 레포의 MIT 라이선스는 이 레포의 파일에만 적용됩니다.
+
 서비스는 베타라 요금·한도·도구 이름이 바뀔 수 있습니다. 데이터 출처, 도구별 한도, 알려진 제약은 [ipzitalk 가이드](docs/IPZITALK.md)에 정리했고, 최신 내용은 [ipzitalk 안내 페이지](https://ipzi-talk.synergylabs.kr)와 [GitHub](https://github.com/chatdaeri/ipzitalk)를 확인하세요.
 
 ## 설치
